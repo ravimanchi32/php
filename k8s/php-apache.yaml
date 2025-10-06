@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-apache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php-apache
+  template:
+    metadata:
+      labels:
+        app: php-apache
+    spec:
+      containers:
+        - name: php-apache
+          image: ravikumarmanchi/php-lamp-app:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: DB_HOST
+              value: "mysql-service"
+            - name: DB_NAME
+              value: "bookstore"
+            - name: DB_USER
+              value: "user"
+            - name: DB_PASSWORD
+              value: "userpassword"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-service
+spec:
+  selector:
+    app: php-apache
+  type: NodePort
+  ports:
+    - port: 80        # service port inside cluster
+      targetPort: 80  # container port
+      nodePort: 30080 # port on node (must be 30000-32767)
